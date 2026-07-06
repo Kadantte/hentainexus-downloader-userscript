@@ -77,18 +77,18 @@ System.register("./__entry.js", [], (function (exports, module) {
         });
       };
       if (location.pathname == "/" || location.pathname.startsWith("/page") || location.pathname.startsWith("/favorites")) {
-        __vitePreload(() => module.import('./library-Mt9nWhOw-zIWo-DSg.js'), void 0 ).then((m) => m.init());
+        __vitePreload(() => module.import('./library-6LUIFUyB-7kFNLgJp.js'), void 0 ).then((m) => m.init());
       } else if (location.pathname.startsWith("/view/")) {
-        __vitePreload(() => module.import('./gallery-ESqoNMhv-Zq_KgQJB.js'), void 0 ).then((m) => m.init());
+        __vitePreload(() => module.import('./gallery-RKWZgGDm-67US8pbf.js'), void 0 ).then((m) => m.init());
       } else if (location.pathname.startsWith("/settings")) {
-        __vitePreload(() => module.import('./settings-_03oqxPd-XE-OHLWG.js'), void 0 ).then((m) => m.init());
+        __vitePreload(() => module.import('./settings-jDkTTiWX-NZqKtFph.js'), void 0 ).then((m) => m.init());
       }
 
     })
   };
 }));
 
-System.register("./library-Mt9nWhOw-zIWo-DSg.js", ['./utils-2_Q28Rc0-GHC0jVV4.js'], (function (exports, module) {
+System.register("./library-6LUIFUyB-7kFNLgJp.js", ['./stores-B3C_LVr_-KbD-57jp.js', './settings-jDkTTiWX-NZqKtFph.js'], (function (exports, module) {
   'use strict';
   var downloaded, downloadIcon, createLibraryItemDownloadStateManager, getMetadata, getImages, startDownload, sleep, createDownloadStateStore;
   return {
@@ -101,7 +101,7 @@ System.register("./library-Mt9nWhOw-zIWo-DSg.js", ['./utils-2_Q28Rc0-GHC0jVV4.js
       startDownload = module.s;
       sleep = module.e;
       createDownloadStateStore = module.f;
-    }],
+    }, null],
     execute: (function () {
 
       const downloadState = createDownloadStateStore();
@@ -238,7 +238,7 @@ System.register("./library-Mt9nWhOw-zIWo-DSg.js", ['./utils-2_Q28Rc0-GHC0jVV4.js
   };
 }));
 
-System.register("./gallery-ESqoNMhv-Zq_KgQJB.js", ['./utils-2_Q28Rc0-GHC0jVV4.js'], (function (exports, module) {
+System.register("./gallery-RKWZgGDm-67US8pbf.js", ['./stores-B3C_LVr_-KbD-57jp.js', './settings-jDkTTiWX-NZqKtFph.js'], (function (exports, module) {
   'use strict';
   var getData, downloadIcon, downloaded, sleep, xMarkIcon, spinnerIcon, createDownloadStateStore, getImages, startDownload;
   return {
@@ -252,7 +252,7 @@ System.register("./gallery-ESqoNMhv-Zq_KgQJB.js", ['./utils-2_Q28Rc0-GHC0jVV4.js
       createDownloadStateStore = module.f;
       getImages = module.b;
       startDownload = module.s;
-    }],
+    }, null],
     execute: (function () {
 
       const downloadState = createDownloadStateStore();
@@ -322,9 +322,13 @@ System.register("./gallery-ESqoNMhv-Zq_KgQJB.js", ['./utils-2_Q28Rc0-GHC0jVV4.js
   };
 }));
 
-System.register("./utils-2_Q28Rc0-GHC0jVV4.js", [], (function (exports, module) {
+System.register("./stores-B3C_LVr_-KbD-57jp.js", ['./settings-jDkTTiWX-NZqKtFph.js'], (function (exports, module) {
   'use strict';
+  var getImageFormat;
   return {
+    setters: [module => {
+      getImageFormat = module.getImageFormat;
+    }],
     execute: (function () {
 
       var __defProp = Object.defineProperty;
@@ -1770,6 +1774,17 @@ System.register("./utils-2_Q28Rc0-GHC0jVV4.js", [], (function (exports, module) 
         });
       })(StreamSaver);
       var StreamSaverExports = StreamSaver.exports;
+      const sleep = exports("e", (time) => new Promise((r) => setTimeout(r, time)));
+      const getImageUrl = (image) => {
+        switch (getImageFormat()) {
+          case "avif":
+            return image.image_avif;
+          case "fallback":
+            return image.image_fallback;
+          case "source":
+            return image.image_source;
+        }
+      };
       const primeNumbers = [2, 3, 5, 7, 11, 13, 17, 19];
       const limit = pLimit(4);
       const generateFilename = ({ title, artists, magazines }) => {
@@ -1842,7 +1857,7 @@ System.register("./utils-2_Q28Rc0-GHC0jVV4.js", [], (function (exports, module) 
         return result;
       };
       const fetchImage = async (image, zip) => {
-        const response = await fetch(image.image_fallback);
+        const response = await fetch(getImageUrl(image));
         const blob = await response.blob();
         const extension = blob.type.split("/").at(-1);
         const imageFile = new ZipPassThrough(`${image.url_label}.${extension}`);
@@ -1928,7 +1943,10 @@ System.register("./utils-2_Q28Rc0-GHC0jVV4.js", [], (function (exports, module) 
         );
         const stripFilter = localStorage.getItem("strip_filter") === "true";
         if (stripFilter) {
-          return images.map((image) => ({ ...image, image: image.image_fallback.replace("?filter=null", "") }));
+          return images.map((image) => ({
+            ...image,
+            image: getImageUrl(image).replace("?filter=null", "")
+          }));
         }
         return images;
       });
@@ -2082,17 +2100,49 @@ System.register("./utils-2_Q28Rc0-GHC0jVV4.js", [], (function (exports, module) 
           subscribe
         };
       });
-      const sleep = exports("e", (time) => new Promise((r) => setTimeout(r, time)));
 
     })
   };
 }));
 
-System.register("./settings-_03oqxPd-XE-OHLWG.js", [], (function (exports, module) {
+System.register("./settings-jDkTTiWX-NZqKtFph.js", [], (function (exports, module) {
   'use strict';
   return {
     execute: (function () {
 
+      const formatOptions = [
+        { value: "avif", label: "AVIF" },
+        { value: "fallback", label: "WebP" },
+        { value: "source", label: "Original" }
+      ];
+      const getImageFormat = exports("getImageFormat", () => localStorage.getItem("image_format") ?? "source");
+      const buildSelectFormatField = ({ description, value }) => {
+        const container = document.createElement("div");
+        container.classList.add("field");
+        const control = document.createElement("div");
+        control.classList.add("control");
+        const selectContainer = document.createElement("div");
+        selectContainer.classList.add("select", "is-fullwidth");
+        const label = document.createElement("label");
+        label.classList.add("subtitle", "is-6");
+        label.htmlFor = "image_format";
+        label.innerHTML = description;
+        const select = document.createElement("select");
+        select.name = "image_format";
+        select.id = "image_format";
+        for (const format of formatOptions) {
+          const option = document.createElement("option");
+          option.value = format.value;
+          option.innerHTML = format.label;
+          option.selected = value === format.value;
+          select.append(option);
+        }
+        selectContainer.append(select);
+        control.append(label);
+        control.append(selectContainer);
+        container.append(control);
+        return container;
+      };
       const buildCheckboxField = ({ name, description, value }) => {
         const container = document.createElement("div");
         container.classList.add("field");
@@ -2120,10 +2170,12 @@ System.register("./settings-_03oqxPd-XE-OHLWG.js", [], (function (exports, modul
           const formProps = Object.fromEntries(formData);
           localStorage.setItem("skip_download", formProps["skip_download"] ? "true" : "false");
           localStorage.setItem("strip_filter", formProps["strip_filter"] ? "true" : "false");
+          localStorage.setItem("image_format", formProps["image_format"]);
           location.reload();
         };
         const skipDownload = localStorage.getItem("skip_download");
         const stripFilter = localStorage.getItem("strip_filter");
+        const imageFormat = getImageFormat();
         const skipDownloadCheckbox = buildCheckboxField({
           name: "skip_download",
           description: "Skip downloaded galleries from batch downloads.",
@@ -2134,7 +2186,12 @@ System.register("./settings-_03oqxPd-XE-OHLWG.js", [], (function (exports, modul
           description: "Avoid striping '?filter=null' from the image URL. Enable this if downloads fail or are incomplete.",
           value: stripFilter === "true"
         });
-        form.append(skipDownloadCheckbox, stripFilterCheckbox);
+        const formatField = buildSelectFormatField({
+          name: "image_format",
+          description: "Image download format",
+          value: imageFormat
+        });
+        form.append(skipDownloadCheckbox, stripFilterCheckbox, formatField);
         const submitButton = document.createElement("div");
         submitButton.classList.add("filter");
         submitButton.innerHTML = '<div class="control"><button class="button is-primary">Submit</button></div>';
@@ -2142,7 +2199,7 @@ System.register("./settings-_03oqxPd-XE-OHLWG.js", [], (function (exports, modul
         const columns = document.createElement("div");
         columns.classList.add("columns");
         const column = document.createElement("div");
-        column.classList.add("column");
+        column.classList.add("column", "is-one-third");
         column.append(form);
         columns.append(column);
         container.append(separator);

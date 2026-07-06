@@ -2,8 +2,11 @@ import { AsyncZipDeflate, Zip, ZipPassThrough, strToU8 } from 'fflate';
 import pLimit from 'p-limit';
 import { createWriteStream } from 'streamsaver';
 import type { Gallery } from './data';
+import { getImageUrl } from './utils';
 
-type Image = {
+export type Image = {
+	image_avif: string;
+	image_source: string;
 	image_fallback: string;
 	label: string;
 	url_label: string;
@@ -142,7 +145,7 @@ export const decryptData = (encoded: string) => {
 };
 
 const fetchImage = async (image: Image, zip: Zip) => {
-	const response = await fetch(image.image_fallback);
+	const response = await fetch(getImageUrl(image));
 
 	const blob = await response.blob();
 	const extension = blob!.type.split('/').at(-1);
@@ -253,7 +256,10 @@ export const getImages = async (id: number) => {
 	const stripFilter = localStorage.getItem('strip_filter') === 'true';
 
 	if (stripFilter) {
-		return images.map((image) => ({ ...image, image: image.image_fallback.replace('?filter=null', '') }));
+		return images.map((image) => ({
+			...image,
+			image: getImageUrl(image).replace('?filter=null', '')
+		}));
 	}
 
 	return images;

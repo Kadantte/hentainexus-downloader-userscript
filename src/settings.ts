@@ -4,6 +4,54 @@ type Field<T> = {
 	value: T;
 };
 
+const imageFormats = ['avif', 'fallback', 'source'] as const;
+
+type ImageFormat = (typeof imageFormats)[number];
+
+const formatOptions: { value: ImageFormat; label: string }[] = [
+	{ value: 'avif', label: 'AVIF' },
+	{ value: 'fallback', label: 'WebP' },
+	{ value: 'source', label: 'Original' }
+];
+
+export const getImageFormat = (): ImageFormat =>
+	(localStorage.getItem('image_format') as ImageFormat) ?? 'source';
+
+const buildSelectFormatField = ({ description, value }: Field<string>) => {
+	const container = document.createElement('div');
+	container.classList.add('field');
+
+	const control = document.createElement('div');
+	control.classList.add('control');
+
+	const selectContainer = document.createElement('div');
+	selectContainer.classList.add('select', 'is-fullwidth');
+
+	const label = document.createElement('label');
+	label.classList.add('subtitle', 'is-6');
+	label.htmlFor = 'image_format';
+	label.innerHTML = description;
+
+	const select = document.createElement('select');
+	select.name = 'image_format';
+	select.id = 'image_format';
+
+	for (const format of formatOptions) {
+		const option = document.createElement('option');
+		option.value = format.value;
+		option.innerHTML = format.label;
+		option.selected = value === format.value;
+		select.append(option);
+	}
+
+	selectContainer.append(select);
+	control.append(label);
+	control.append(selectContainer);
+	container.append(control);
+
+	return container;
+};
+
 const buildCheckboxField = ({ name, description, value }: Field<boolean>) => {
 	const container = document.createElement('div');
 	container.classList.add('field');
@@ -41,12 +89,14 @@ const addSettings = () => {
 
 		localStorage.setItem('skip_download', formProps['skip_download'] ? 'true' : 'false');
 		localStorage.setItem('strip_filter', formProps['strip_filter'] ? 'true' : 'false');
+		localStorage.setItem('image_format', formProps['image_format'] as string);
 
 		location.reload();
 	};
 
 	const skipDownload = localStorage.getItem('skip_download');
 	const stripFilter = localStorage.getItem('strip_filter');
+	const imageFormat = getImageFormat();
 
 	const skipDownloadCheckbox = buildCheckboxField({
 		name: 'skip_download',
@@ -61,7 +111,13 @@ const addSettings = () => {
 		value: stripFilter === 'true'
 	});
 
-	form.append(skipDownloadCheckbox, stripFilterCheckbox);
+	const formatField = buildSelectFormatField({
+		name: 'image_format',
+		description: 'Image download format',
+		value: imageFormat
+	});
+
+	form.append(skipDownloadCheckbox, stripFilterCheckbox, formatField);
 
 	const submitButton = document.createElement('div');
 	submitButton.classList.add('filter');
@@ -73,7 +129,7 @@ const addSettings = () => {
 	const columns = document.createElement('div');
 	columns.classList.add('columns');
 	const column = document.createElement('div');
-	column.classList.add('column');
+	column.classList.add('column', 'is-one-third');
 
 	column.append(form);
 	columns.append(column);
