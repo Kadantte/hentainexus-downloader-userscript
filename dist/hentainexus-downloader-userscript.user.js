@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         hentainexus-downloader-userscript
 // @namespace    vite-plugin-monkey
-// @version      1.3.1
+// @version      1.3.2
 // @author       monkey
 // @description  Allows users to download a gallery from HentaiNexus with it's metadata
 // @downloadURL  https://github.com/LetrixZ/hentainexus-downloader-userscript/raw/main/dist/hentainexus-downloader-userscript.user.js
